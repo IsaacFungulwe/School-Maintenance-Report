@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Menu, X, LogOut, Sun, Moon, Settings } from 'lucide-react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
 
@@ -15,17 +15,17 @@ export const Navbar = ({ onMenuClick }) => {
   }
 
   return (
-    <nav className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+    <nav className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-soft">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6">
         {/* Left side - Menu and Logo */}
         <div className="flex items-center gap-4">
           <button
             onClick={onMenuClick}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden text-gray-600 dark:text-gray-400"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden text-gray-600 dark:text-gray-400 transition-colors"
           >
             <Menu size={20} />
           </button>
-          <Link to="/" className="font-bold text-xl text-gray-900 dark:text-white hidden sm:block">
+          <Link to="/" className="font-bold text-xl text-primary dark:text-white hidden sm:block">
             SMR
           </Link>
         </div>
@@ -45,9 +45,9 @@ export const Navbar = ({ onMenuClick }) => {
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group"
             >
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
+              <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-semibold">
                 {user?.name?.charAt(0).toUpperCase() || 'U'}
               </div>
               <div className="hidden sm:block text-left">
@@ -58,6 +58,33 @@ export const Navbar = ({ onMenuClick }) => {
                   {user?.role}
                 </p>
               </div>
+            </button>
+
+            {/* Dropdown Menu */}
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+                <Link
+                  to="/settings"
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-lg"
+                >
+                  <Settings size={16} />
+                  Settings
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 last:rounded-b-lg"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </nav>
+  )
+}
             </button>
 
             {/* User Dropdown */}

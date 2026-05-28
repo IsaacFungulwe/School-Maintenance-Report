@@ -2,8 +2,8 @@ import React from 'react'
 
 export const Card = ({ children, className = '', hover = false }) => (
   <div
-    className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm transition-all ${
-      hover ? 'hover:shadow-md hover:-translate-y-0.5' : ''
+    className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-soft transition-all duration-200 ${
+      hover ? 'hover:shadow-soft-md hover:-translate-y-0.5' : ''
     } ${className}`}
   >
     {children}

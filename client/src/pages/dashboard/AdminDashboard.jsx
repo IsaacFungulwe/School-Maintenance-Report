@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react'
 import { BarChart3, Ticket, Users, MapPin } from 'lucide-react'
 import { DashboardLayout } from '../../layouts'
 import { Card, CardHeader, CardBody } from '../../components/common/Card'
-import { SkeletonLoader, Spinner } from '../../components/common/Loaders'
+import { SkeletonLoader } from '../../components/common/Loaders'
 import { ticketApi } from '../../api/ticketApi'
 import { userApi } from '../../api/userApi'
 import toast from 'react-hot-toast'
 
-const StatCard = ({ icon: Icon, label, value, loading, color = 'blue' }) => {
+const StatCard = ({ icon: Icon, label, value, loading, color = 'primary' }) => {
   const colorClasses = {
-    blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+    primary: 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-blue-300',
     green: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
     orange: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
     red: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
@@ -83,7 +83,7 @@ export const AdminDashboard = () => {
             label="Total Tickets"
             value={stats?.total || 0}
             loading={loading}
-            color="blue"
+            color="primary"
           />
           <StatCard
             icon={Ticket}

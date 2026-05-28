@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Plus, Search, Filter, Download } from 'lucide-react'
+import { Plus, Download } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { DashboardLayout } from '../../layouts'
 import { Card } from '../../components/common/Card'
@@ -82,7 +82,6 @@ export const TicketListPage = () => {
               setSearchTerm(e.target.value)
               setCurrentPage(1)
             }}
-            icon={<Search size={18} />}
           />
           <Select
             options={[

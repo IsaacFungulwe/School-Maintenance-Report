@@ -8,7 +8,6 @@ import { Select } from '../../components/common/Select'
 import { FileUpload } from '../../components/common/FileUpload'
 import { Alert } from '../../components/common/Alert'
 import { ticketApi } from '../../api/ticketApi'
-import { locationApi } from '../../api/locationApi'
 import toast from 'react-hot-toast'
 
 export const CreateTicketPage = () => {

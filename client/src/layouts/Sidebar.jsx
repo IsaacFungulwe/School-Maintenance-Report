@@ -7,6 +7,7 @@ import {
   MapPin,
   BarChart3,
   Settings,
+  LogOut,
   X,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
@@ -14,22 +15,27 @@ import { useAuth } from '../hooks/useAuth'
 const SidebarLink = ({ to, icon: Icon, label, active }) => (
   <Link
     to={to}
-    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
       active
-        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold'
-        : 'text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+        ? 'bg-primary text-white shadow-soft-md'
+        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
     }`}
   >
-    <Icon size={20} />
-    <span className="hidden lg:inline">{label}</span>
+    <Icon size={20} className={active ? '' : 'group-hover:text-primary'} />
+    <span className="text-sm font-medium">{label}</span>
   </Link>
 )
 
 export const Sidebar = ({ isOpen, onClose }) => {
-  const { user, hasRole } = useAuth()
+  const { user, logout, hasRole } = useAuth()
   const location = useLocation()
 
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/')
+
+  const handleLogout = () => {
+    logout()
+    window.location.href = '/login'
+  }
 
   const adminLinks = [
     { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -62,28 +68,28 @@ export const Sidebar = ({ isOpen, onClose }) => {
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black bg-opacity-50 lg:hidden"
+          className="fixed inset-0 z-30 bg-black/50 lg:hidden backdrop-blur-sm"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-40 transform transition-transform lg:translate-x-0 overflow-y-auto ${
+        className={`fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-40 transform transition-transform duration-300 lg:translate-x-0 overflow-y-auto ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="p-4">
+        <div className="flex flex-col h-full p-4">
           {/* Close button for mobile */}
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden mb-4 w-full flex justify-center"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden mb-4 w-full flex justify-center text-gray-600 dark:text-gray-400 transition-colors"
           >
-            <X size={20} className="text-gray-600 dark:text-gray-400" />
+            <X size={20} />
           </button>
 
           {/* Navigation Links */}
-          <nav className="space-y-2">
+          <nav className="flex-1 space-y-1">
             {links.map((link) => (
               <SidebarLink
                 key={link.to}
@@ -95,9 +101,27 @@ export const Sidebar = ({ isOpen, onClose }) => {
             ))}
           </nav>
 
-          {/* Settings Link */}
-          <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+          {/* Bottom Section */}
+          <div className="space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4">
             <SidebarLink
+              to="/settings"
+              icon={Settings}
+              label="Settings"
+              active={isActive('/settings')}
+            />
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
+            >
+              <LogOut size={20} />
+              <span className="text-sm font-medium">Logout</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
+  )
+}
               to="/settings"
               icon={Settings}
               label="Settings"

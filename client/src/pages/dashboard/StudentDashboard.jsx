@@ -6,7 +6,7 @@ import { Card, CardHeader, CardBody } from '../../components/common/Card'
 import { Button } from '../../components/common/Button'
 import { SkeletonLoader } from '../../components/common/Loaders'
 import { ticketApi } from '../../api/ticketApi'
-import { Badge, StatusBadge } from '../../components/common/Badge'
+import { StatusBadge } from '../../components/common/Badge'
 import toast from 'react-hot-toast'
 
 const TicketCard = ({ ticket }) => (

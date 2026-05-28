@@ -3,6 +3,8 @@ import React from 'react'
 export const Badge = ({ children, variant = 'default', className = '' }) => {
   const variants = {
     default: 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100',
+    primary: 'bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200',
+    navy: 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-blue-300',
     blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200',
     green: 'bg-green-100 dark:bg-green-900/30 text-green-900 dark:text-green-200',
     orange: 'bg-orange-100 dark:bg-orange-900/30 text-orange-900 dark:text-orange-200',
@@ -19,12 +21,13 @@ export const Badge = ({ children, variant = 'default', className = '' }) => {
 
 export const StatusBadge = ({ status }) => {
   const statusMap = {
-    open: 'blue',
-    'in_progress': 'orange',
-    'in progress': 'orange',
+    open: 'orange',
+    'in_progress': 'primary',
+    'in progress': 'primary',
     resolved: 'green',
     rejected: 'red',
     pending: 'yellow',
+    closed: 'gray-500',
   }
 
   const variant = statusMap[status?.toLowerCase()] || 'default'

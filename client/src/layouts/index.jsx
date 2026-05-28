@@ -11,7 +11,7 @@ export const DashboardLayout = ({ children }) => {
       <div className="flex flex-1 overflow-hidden">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <main className="flex-1 overflow-y-auto lg:ml-0">
-          <div className="min-h-full">
+          <div className="min-h-full bg-gray-50 dark:bg-gray-900">
             {children}
           </div>
         </main>
@@ -21,7 +21,7 @@ export const DashboardLayout = ({ children }) => {
 }
 
 export const AuthLayout = ({ children }) => (
-  <div className="flex h-screen items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+  <div className="flex h-screen items-center justify-center bg-gradient-to-br from-primary via-primary-light to-gray-900">
     {children}
   </div>
 )
