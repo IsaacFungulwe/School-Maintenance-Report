@@ -1,0 +1,24 @@
+info:
+  name: Set up the Request in Bruno
+  type: http
+  seq: 11
+
+http:
+  method: POST
+  url: http://localhost:5000/api/tickets/2/notes
+  headers:
+    - name: Authorization
+      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJyb2xlIjoic3R1ZGVudCIsIm5hbWUiOiJJc2FhYyBGdW5ndWx3ZSIsImlhdCI6MTc3OTgzNjM3NiwiZXhwIjoxNzgwNDQxMTc2fQ.vLSm6B3dRYoEwQoTbYqj29V1rfPbJZ968ZWPtD9qy8k
+  body:
+    type: json
+    data: |-
+      {
+        "note": "Maintenance team has been alerted. A carpentry team member will review the desk leg."
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

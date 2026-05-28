@@ -1,6 +1,8 @@
 const router       = require('express').Router();
 const authenticate = require('../middleware/authenticate');
 const authorize    = require('../middleware/authorize');
+const noteRoutes   = require('./notes');
+
 const {
   getTickets, getTicketById, createTicket,
   updateStatus, assignTicket, deleteTicket, getStats,
@@ -10,6 +12,8 @@ const {
 router.get('/stats',
   authenticate, authorize('admin'),
   getStats);
+
+  router.use('/:id/notes', noteRoutes);
 
 router.get('/',
   authenticate,

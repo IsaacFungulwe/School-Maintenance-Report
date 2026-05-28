@@ -9,11 +9,14 @@ const getTickets = async (req, res, next) => {
     const conditions = ['t.deleted_at IS NULL'];
     const params     = [];
 
+    // FIX: Parse string user ID into a base-10 numerical integer for BIGINT comparisons
+    const numericUserId = parseInt(id, 10);
+
     if (role === 'technician') {
-      params.push(id);
+      params.push(numericUserId);
       conditions.push(`t.assigned_to = $${params.length}`);
     } else if (role !== 'admin') {
-      params.push(id);
+      params.push(numericUserId);
       conditions.push(`t.submitted_by = $${params.length}`);
     }
 
@@ -47,7 +50,8 @@ const getTickets = async (req, res, next) => {
       params
     );
 
-    res.json(rows);
+    // Safeguard: Ensure rows is always an array, never null or undefined
+    res.json(rows || []);
   } catch (err) {
     next(err);
   }
@@ -57,6 +61,9 @@ const getTickets = async (req, res, next) => {
 const getTicketById = async (req, res, next) => {
   try {
     const { role, id: userId } = req.user;
+    
+    // FIX: Parse route parameter ID string to integer to prevent comparison mismatches
+    const ticketId = parseInt(req.params.id, 10);
 
     const { rows } = await pool.query(
       `SELECT
@@ -71,17 +78,18 @@ const getTicketById = async (req, res, next) => {
        LEFT JOIN users     u ON u.id = t.submitted_by
        LEFT JOIN users     a ON a.id = t.assigned_to
        WHERE t.id = $1 AND t.deleted_at IS NULL`,
-      [req.params.id]
+      [ticketId]
     );
 
     const ticket = rows[0];
     if (!ticket) return res.status(404).json({ error: 'Ticket not found.' });
 
-    if ((role === 'student' || role === 'staff') && ticket.submitted_by !== userId) {
+    // FIX: Standardize check using safe string casting for comparison
+    if ((role === 'student' || role === 'staff') && String(ticket.submitted_by) !== String(userId)) {
       return res.status(403).json({ error: 'Access denied.' });
     }
 
-    if (role === 'technician' && ticket.assigned_to !== userId) {
+    if (role === 'technician' && String(ticket.assigned_to) !== String(userId)) {
       return res.status(403).json({ error: 'Access denied.' });
     }
 
@@ -102,12 +110,16 @@ const createTicket = async (req, res, next) => {
       });
     }
 
+    // FIX: Enforce clean numerical parsing for parent structural context insertions
+    const parsedLocationId = parseInt(location_id, 10);
+    const parsedUserId = parseInt(req.user.id, 10);
+
     const { rows } = await pool.query(
       `INSERT INTO tickets
          (title, description, category, priority, location_id, submitted_by, last_modified_by, image_url)
        VALUES ($1, $2, $3, $4, $5, $6, $6, $7)
        RETURNING *`,
-      [title, description, category, priority || 'low', location_id, req.user.id, image_url || null]
+      [title, description, category, priority || 'low', parsedLocationId, parsedUserId, image_url || null]
     );
 
     res.status(201).json(rows[0]);
@@ -131,13 +143,16 @@ const updateStatus = async (req, res, next) => {
       });
     }
 
+    const ticketId = parseInt(req.params.id, 10);
+    const parsedUserId = parseInt(userId, 10);
+
     const { rows: existing } = await pool.query(
       `SELECT * FROM tickets WHERE id = $1 AND deleted_at IS NULL`,
-      [req.params.id]
+      [ticketId]
     );
     if (!existing[0]) return res.status(404).json({ error: 'Ticket not found.' });
 
-    if (role === 'technician' && existing[0].assigned_to !== userId) {
+    if (role === 'technician' && String(existing[0].assigned_to) !== String(userId)) {
       return res.status(403).json({ error: 'You can only update tickets assigned to you.' });
     }
 
@@ -146,12 +161,12 @@ const updateStatus = async (req, res, next) => {
        SET    status = $1, last_modified_by = $2
        WHERE  id = $3
        RETURNING *`,
-      [status, userId, req.params.id]
+      [status, parsedUserId, ticketId]
     );
 
     res.json(rows[0]);
   } catch (err) {
-    next(err); // DB trigger raises exception for invalid transitions
+    next(err);
   }
 };
 
@@ -164,10 +179,14 @@ const assignTicket = async (req, res, next) => {
       return res.status(400).json({ error: 'technician_id is required.' });
     }
 
+    const parsedTechId = parseInt(technician_id, 10);
+    const parsedAdminId = parseInt(req.user.id, 10);
+    const ticketId = parseInt(req.params.id, 10);
+
     const { rows: techRows } = await pool.query(
       `SELECT id FROM users
        WHERE id = $1 AND role = 'technician' AND deleted_at IS NULL`,
-      [technician_id]
+      [parsedTechId]
     );
     if (!techRows[0]) {
       return res.status(400).json({ error: 'User is not an active technician.' });
@@ -178,7 +197,7 @@ const assignTicket = async (req, res, next) => {
        SET    assigned_to = $1, status = 'pending', last_modified_by = $2
        WHERE  id = $3 AND deleted_at IS NULL
        RETURNING *`,
-      [technician_id, req.user.id, req.params.id]
+      [parsedTechId, parsedAdminId, ticketId]
     );
 
     if (!rows[0]) return res.status(404).json({ error: 'Ticket not found.' });
@@ -188,15 +207,18 @@ const assignTicket = async (req, res, next) => {
   }
 };
 
-// DELETE /api/tickets/:id  (soft delete, admin only)
+// DELETE /api/tickets/:id
 const deleteTicket = async (req, res, next) => {
   try {
+    const ticketId = parseInt(req.params.id, 10);
+    const parsedUserId = parseInt(req.user.id, 10);
+
     const { rows } = await pool.query(
       `UPDATE tickets
        SET    deleted_at = NOW(), last_modified_by = $1
        WHERE  id = $2 AND deleted_at IS NULL
        RETURNING id`,
-      [req.user.id, req.params.id]
+      [parsedUserId, ticketId]
     );
 
     if (!rows[0]) return res.status(404).json({ error: 'Ticket not found.' });
@@ -206,7 +228,7 @@ const deleteTicket = async (req, res, next) => {
   }
 };
 
-// GET /api/tickets/stats  (admin dashboard counts)
+// GET /api/tickets/stats
 const getStats = async (req, res, next) => {
   try {
     const { rows } = await pool.query(`
@@ -232,4 +254,4 @@ const getStats = async (req, res, next) => {
 module.exports = {
   getTickets, getTicketById, createTicket,
   updateStatus, assignTicket, deleteTicket, getStats,
-};
+}; 

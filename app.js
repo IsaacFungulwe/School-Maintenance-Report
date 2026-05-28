@@ -1,15 +1,18 @@
+require('dotenv').config();
+
 const express    = require('express');
 const cors       = require('cors');
 const helmet     = require('helmet');
 const morgan     = require('morgan');
 
-const errorHandler = require('./middleware/errorHandler');
+// Updated paths to look inside the src/ folder
+const errorHandler = require('./src/middleware/errorHandler');
 
-const authRoutes      = require('./routes/auth');
-const ticketRoutes    = require('./routes/tickets');
-const noteRoutes      = require('./routes/notes');
-const userRoutes      = require('./routes/users');
-const locationRoutes  = require('./routes/locations');
+const authRoutes      = require('./src/routes/auth');
+const ticketRoutes    = require('./src/routes/tickets');
+const noteRoutes      = require('./src/routes/notes');
+const userRoutes      = require('./src/routes/users');
+const locationRoutes  = require('./src/routes/locations');
 
 const app = express();
 
@@ -20,7 +23,7 @@ app.use(express.json());
 
 app.use('/api/auth',      authRoutes);
 app.use('/api/tickets',   ticketRoutes);
-app.use('/api/tickets',   noteRoutes);
+//app.use('/api/tickets',   noteRoutes);
 app.use('/api/users',     userRoutes);
 app.use('/api/locations', locationRoutes);
 

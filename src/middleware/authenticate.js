@@ -14,10 +14,13 @@ const authenticate = (req, res, next) => {
     req.user = decoded; // { id, role, name, iat, exp }
     next();
   } catch (err) {
+    // This will print the actual underlying error to your terminal!
+    console.error("🔴 ACTUAL JWT VERIFY ERROR:", err);
+
     const message =
       err.name === 'TokenExpiredError'
         ? 'Session expired. Please log in again.'
-        : 'Invalid token.';
+        : `Invalid token. Reason: ${err.message}`; // Expose the exact message to Bruno
     return res.status(401).json({ error: message });
   }
 };

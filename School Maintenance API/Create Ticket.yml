@@ -1,0 +1,27 @@
+info:
+  name: Create Ticket
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/tickets"
+  headers:
+    - name: Authorization
+      value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJyb2xlIjoic3R1ZGVudCIsIm5hbWUiOiJJc2FhYyBGdW5ndWx3ZSIsImlhdCI6MTc3OTgzNjM3NiwiZXhwIjoxNzgwNDQxMTc2fQ.vLSm6B3dRYoEwQoTbYqj29V1rfPbJZ968ZWPtD9qy8k
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Broken Desk",
+        "description": "The front row desk has a broken leg in Computer Lab 1.",
+        "category": "furniture",
+        "priority": "medium",
+        "location_id": 2
+      }
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
