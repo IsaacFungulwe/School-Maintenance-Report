@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { AlertCircle } from 'lucide-react'
 import { Button } from '../../components/common/Button'
@@ -10,7 +9,7 @@ export const NotFoundPage = () => (
       <h1 className="text-4xl font-bold text-white mb-2">404</h1>
       <p className="text-xl text-gray-400 mb-6">Page not found</p>
       <p className="text-gray-500 mb-8 max-w-sm">
-        The page you're looking for doesn't exist. Let's get you back on track.
+        The page you&apos;re looking for doesn&apos;t exist. Let&apos;s get you back on track.
       </p>
     </div>
     <Link to="/">
@@ -26,7 +25,7 @@ export const UnauthorizedPage = () => (
       <h1 className="text-4xl font-bold text-white mb-2">403</h1>
       <p className="text-xl text-gray-400 mb-6">Access Denied</p>
       <p className="text-gray-500 mb-8 max-w-sm">
-        You don't have permission to access this resource.
+        You don&apos;t have permission to access this resource.
       </p>
     </div>
     <Link to="/dashboard">

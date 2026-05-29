@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { Menu, X, LogOut, Sun, Moon, Settings } from 'lucide-react'
+import { Menu, LogOut, Sun, Moon, Settings } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useTheme } from '../hooks/useTheme'
+import { NotificationBell } from '../components/common/NotificationBell'
 
 export const Navbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth()
@@ -32,6 +33,9 @@ export const Navbar = ({ onMenuClick }) => {
 
         {/* Right side - Actions */}
         <div className="flex items-center gap-4">
+          {/* Notification Bell - Admin only */}
+          <NotificationBell />
+
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
@@ -73,37 +77,6 @@ export const Navbar = ({ onMenuClick }) => {
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 last:rounded-b-lg"
-                >
-                  <LogOut size={16} />
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </nav>
-  )
-}
-            </button>
-
-            {/* User Dropdown */}
-            {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-                <Link
-                  to="/settings"
-                  className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-lg"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  <Settings size={16} />
-                  Settings
-                </Link>
-                <button
-                  onClick={() => {
-                    setShowUserMenu(false)
-                    handleLogout()
-                  }}
-                  className="w-full flex items-center gap-2 px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 last:rounded-b-lg"
                 >
                   <LogOut size={16} />
                   Logout

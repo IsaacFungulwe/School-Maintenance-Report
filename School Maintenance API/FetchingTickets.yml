@@ -6,6 +6,9 @@ info:
 http:
   method: GET
   url: http://localhost:5000/api/tickets
+  headers:
+    - name: Authorization
+      value: Bearer {{jwtToken}}
   body:
     type: json
     data: ""

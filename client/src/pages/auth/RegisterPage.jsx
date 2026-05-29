@@ -16,12 +16,22 @@ export const RegisterPage = () => {
     password: '',
     confirmPassword: '',
     role: 'student',
+    department: '',
   })
   const [formError, setFormError] = useState('')
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+    setFormError('')
+  }
+
+  const handleRoleChange = (newRole) => {
+    setFormData((prev) => ({
+      ...prev,
+      role: newRole,
+      department: '',
+    }))
     setFormError('')
   }
 
@@ -50,14 +60,24 @@ export const RegisterPage = () => {
       setFormError('Password must be at least 6 characters')
       return
     }
+    if (formData.role === 'staff' && !formData.department) {
+      setFormError('Department is required for staff members')
+      return
+    }
 
     try {
-      await register({
+      const payload = {
         name: formData.name,
         email: formData.email,
         password: formData.password,
         role: formData.role,
-      })
+      }
+      if (formData.role === 'staff') {
+        payload.department = formData.department
+      } else {
+        payload.department = null
+      }
+      await register(payload)
       navigate('/dashboard')
     } catch (err) {
       setFormError(err.message)
@@ -100,16 +120,64 @@ export const RegisterPage = () => {
             required
           />
 
-          <Select
-            label="Role"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            options={[
-              { value: 'student', label: 'Student' },
-              { value: 'technician', label: 'Technician' },
-            ]}
-          />
+          {/* Role Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+              Role
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Student Card */}
+              <button
+                type="button"
+                onClick={() => handleRoleChange('student')}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  formData.role === 'student'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                }`}
+              >
+                <div className="text-xl mb-1">👨‍🎓</div>
+                <div className="font-semibold text-gray-900 dark:text-white">
+                  Student
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  I am a student
+                </div>
+              </button>
+
+              {/* Staff Card */}
+              <button
+                type="button"
+                onClick={() => handleRoleChange('staff')}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  formData.role === 'staff'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                }`}
+              >
+                <div className="text-xl mb-1">👔</div>
+                <div className="font-semibold text-gray-900 dark:text-white">
+                  Staff
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  I am a teacher, lecturer or department head
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Department Field - Only show when Staff is selected */}
+          {formData.role === 'staff' && (
+            <Input
+              label="Department"
+              type="text"
+              name="department"
+              placeholder="e.g., Computer Science, Engineering"
+              value={formData.department}
+              onChange={handleChange}
+              required
+            />
+          )}
 
           <Input
             label="Password"

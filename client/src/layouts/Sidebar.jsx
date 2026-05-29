@@ -9,6 +9,7 @@ import {
   Settings,
   LogOut,
   X,
+  FileText,
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 
@@ -40,9 +41,10 @@ export const Sidebar = ({ isOpen, onClose }) => {
   const adminLinks = [
     { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/admin/tickets', icon: Ticket, label: 'All Tickets' },
+    { to: '/admin/reports', icon: BarChart3, label: 'Reports' },
+    { to: '/admin/audit', icon: FileText, label: 'Audit Log' },
     { to: '/admin/users', icon: Users, label: 'Users' },
     { to: '/admin/locations', icon: MapPin, label: 'Locations' },
-    { to: '/admin/reports', icon: BarChart3, label: 'Reports' },
   ]
 
   const studentLinks = [
@@ -116,17 +118,6 @@ export const Sidebar = ({ isOpen, onClose }) => {
               <LogOut size={20} />
               <span className="text-sm font-medium">Logout</span>
             </button>
-          </div>
-        </div>
-      </aside>
-    </>
-  )
-}
-              to="/settings"
-              icon={Settings}
-              label="Settings"
-              active={isActive('/settings')}
-            />
           </div>
         </div>
       </aside>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MessageSquare, Clock, MapPin, User } from 'lucide-react'
+import { ArrowLeft, MessageSquare, Clock, MapPin } from 'lucide-react'
 import { DashboardLayout } from '../../layouts'
 import { Card, CardHeader, CardBody, CardFooter } from '../../components/common/Card'
 import { Button } from '../../components/common/Button'

@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const notify = require('../utils/notify');
 
 // GET /api/tickets
 const getTickets = async (req, res, next) => {
@@ -164,6 +165,17 @@ const updateStatus = async (req, res, next) => {
       [status, parsedUserId, ticketId]
     );
 
+    // Notify ticket submitter of status change
+    if (existing[0].submitted_by) {
+      await notify(
+        existing[0].submitted_by,
+        'status_update',
+        'Ticket Status Updated',
+        `Your ticket "${existing[0].title}" status changed to ${status}`,
+        ticketId
+      );
+    }
+
     res.json(rows[0]);
   } catch (err) {
     next(err);
@@ -192,6 +204,14 @@ const assignTicket = async (req, res, next) => {
       return res.status(400).json({ error: 'User is not an active technician.' });
     }
 
+    const { rows: ticketRows } = await pool.query(
+      `SELECT * FROM tickets WHERE id = $1 AND deleted_at IS NULL`,
+      [ticketId]
+    );
+    if (!ticketRows[0]) {
+      return res.status(404).json({ error: 'Ticket not found.' });
+    }
+
     const { rows } = await pool.query(
       `UPDATE tickets
        SET    assigned_to = $1, status = 'pending', last_modified_by = $2
@@ -200,7 +220,15 @@ const assignTicket = async (req, res, next) => {
       [parsedTechId, parsedAdminId, ticketId]
     );
 
-    if (!rows[0]) return res.status(404).json({ error: 'Ticket not found.' });
+    // Notify technician of assignment
+    await notify(
+      parsedTechId,
+      'assigned',
+      'New Ticket Assignment',
+      `You have been assigned ticket: "${ticketRows[0].title}"`,
+      ticketId
+    );
+
     res.json(rows[0]);
   } catch (err) {
     next(err);

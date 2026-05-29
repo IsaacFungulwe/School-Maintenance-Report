@@ -14,7 +14,6 @@ import { Spinner } from './components/common/Loaders'
 import { LoginPage } from './pages/auth/LoginPage'
 import { RegisterPage } from './pages/auth/RegisterPage'
 import { DashboardRedirect } from './pages/dashboard/DashboardRedirect'
-import { AdminDashboard } from './pages/dashboard/AdminDashboard'
 import { StudentDashboard } from './pages/dashboard/StudentDashboard'
 import { TechnicianDashboard } from './pages/dashboard/TechnicianDashboard'
 import { TicketListPage } from './pages/tickets/TicketListPage'
@@ -23,6 +22,10 @@ import { TicketDetailsPage } from './pages/tickets/TicketDetailsPage'
 import { UsersManagementPage } from './pages/admin/UsersManagementPage'
 import { LocationsManagementPage } from './pages/admin/LocationsManagementPage'
 import { SettingsPage } from './pages/admin/SettingsPage'
+import { AdminDashboard } from './pages/admin/AdminDashboard'
+import { AdminTickets } from './pages/admin/AdminTickets'
+import { AdminReports } from './pages/admin/AdminReports'
+import { AuditLog } from './pages/admin/AuditLog'
 import { NotFoundPage, UnauthorizedPage } from './pages/error/ErrorPages'
 
 // Loading component
@@ -77,7 +80,25 @@ function App() {
                 path="/admin/tickets"
                 element={
                   <ProtectedRoute
-                    element={<TicketListPage />}
+                    element={<AdminTickets />}
+                    requiredRoles={['admin']}
+                  />
+                }
+              />
+              <Route
+                path="/admin/reports"
+                element={
+                  <ProtectedRoute
+                    element={<AdminReports />}
+                    requiredRoles={['admin']}
+                  />
+                }
+              />
+              <Route
+                path="/admin/audit"
+                element={
+                  <ProtectedRoute
+                    element={<AuditLog />}
                     requiredRoles={['admin']}
                   />
                 }

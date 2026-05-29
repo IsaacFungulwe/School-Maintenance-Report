@@ -15,6 +15,20 @@ http:
       }
   auth: inherit
 
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Automatically extract and save the token upon a successful login
+        if (res.getStatus() === 200 && res.getBody().token) {
+            bru.setEnvVar("jwtToken", res.getBody().token);
+            console.log(" Token successfully saved to environment!");
+        } else if (res.getStatus() === 200 && res.getBody().accessToken) {
+            // Fallback if your payload property is named 'accessToken'
+            bru.setEnvVar("jwtToken", res.getBody().accessToken);
+            console.log("Access Token successfully saved to environment!");
+        }
+
 settings:
   encodeUrl: true
   timeout: 0

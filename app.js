@@ -13,6 +13,10 @@ const ticketRoutes    = require('./src/routes/tickets');
 const noteRoutes      = require('./src/routes/notes');
 const userRoutes      = require('./src/routes/users');
 const locationRoutes  = require('./src/routes/locations');
+const adminRoutes     = require('./src/routes/admin');
+const notificationRoutes = require('./src/routes/notifications');
+const reportRoutes    = require('./src/routes/reports');
+const auditRoutes     = require('./src/routes/audit');
 
 const app = express();
 
@@ -22,7 +26,11 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 app.use('/api/auth',      authRoutes);
+app.use('/api/admin',     adminRoutes);
 app.use('/api/tickets',   ticketRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/reports',   reportRoutes);
+app.use('/api/audit',     auditRoutes);
 //app.use('/api/tickets',   noteRoutes);
 app.use('/api/users',     userRoutes);
 app.use('/api/locations', locationRoutes);

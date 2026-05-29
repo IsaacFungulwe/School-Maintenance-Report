@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { BarChart3, Ticket, Users, MapPin } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Ticket } from 'lucide-react'
 import { DashboardLayout } from '../../layouts'
 import { Card, CardHeader, CardBody } from '../../components/common/Card'
 import { SkeletonLoader } from '../../components/common/Loaders'
@@ -72,7 +72,7 @@ export const AdminDashboard = () => {
             Dashboard
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Welcome back! Here's your maintenance system overview.
+            Welcome back! Here&apos;s your maintenance system overview.
           </p>
         </div>
 
