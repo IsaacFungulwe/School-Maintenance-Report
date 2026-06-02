@@ -5,7 +5,6 @@ const cors       = require('cors');
 const helmet     = require('helmet');
 const morgan     = require('morgan');
 
-// Updated paths to look inside the src/ folder
 const errorHandler = require('./src/middleware/errorHandler');
 
 const authRoutes      = require('./src/routes/auth');
@@ -21,19 +20,21 @@ const auditRoutes     = require('./src/routes/audit');
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000' }));
+app.use(cors({ 
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  credentials: true 
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 
-app.use('/api/auth',      authRoutes);
-app.use('/api/admin',     adminRoutes);
-app.use('/api/tickets',   ticketRoutes);
+app.use('/api/auth',          authRoutes);
+app.use('/api/admin',         adminRoutes);
+app.use('/api/tickets',       ticketRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/reports',   reportRoutes);
-app.use('/api/audit',     auditRoutes);
-//app.use('/api/tickets',   noteRoutes);
-app.use('/api/users',     userRoutes);
-app.use('/api/locations', locationRoutes);
+app.use('/api/reports',       reportRoutes);
+app.use('/api/audit',         auditRoutes);
+app.use('/api/users',         userRoutes);
+app.use('/api/locations',     locationRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 

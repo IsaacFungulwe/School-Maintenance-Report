@@ -1,6 +1,6 @@
 const express = require('express')
-const { authenticate } = require('../middleware/authenticate')
-const { authorize } = require('../middleware/authorize')
+const authenticate = require('../middleware/authenticate');
+const authorize = require('../middleware/authorize');
 const pool = require('../config/db')
 
 const router = express.Router()

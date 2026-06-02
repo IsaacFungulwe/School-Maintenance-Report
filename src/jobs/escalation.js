@@ -27,7 +27,7 @@ function startEscalationJob() {
     }
   })
 
-  console.log('✅ Escalation job started (every 15 minutes)')
+  console.log(' Escalation job started (every 15 minutes)')
 }
 
 module.exports = { startEscalationJob }

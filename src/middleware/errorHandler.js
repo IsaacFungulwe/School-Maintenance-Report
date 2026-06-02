@@ -11,8 +11,7 @@ const errorHandler = (err, req, res, _next) => {
     return res.status(400).json({ error: 'Referenced record does not exist.' });
   }
 
-  // PostgreSQL: RAISE EXCEPTION from a trigger
-  // e.g. invalid status transition, location soft-delete guard
+  // PostgreSQL: RAISE EXCEPTION from a database trigger function
   if (err.code === 'P0001') {
     return res.status(400).json({ error: err.message });
   }
