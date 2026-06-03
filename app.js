@@ -4,6 +4,7 @@ const express    = require('express');
 const cors       = require('cors');
 const helmet     = require('helmet');
 const morgan     = require('morgan');
+const cookieParser = require('cookie-parser'); // 1. Import cookie-parser
 
 const errorHandler = require('./src/middleware/errorHandler');
 
@@ -26,6 +27,7 @@ app.use(cors({
 }));
 app.use(morgan('dev'));
 app.use(express.json());
+app.use(cookieParser()); // 2. Add this right here before your routes to parse cookies!
 
 app.use('/api/auth',          authRoutes);
 app.use('/api/admin',         adminRoutes);

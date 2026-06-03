@@ -3,7 +3,7 @@ import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Toolti
 import { Bell, Users, AlertCircle, CheckCircle, Clock } from 'lucide-react'
 import { Card } from '../../components/common/Card'
 import { DashboardLayout } from '../../layouts'
-import axios from 'axios'
+import api from '../../utils/api' 
 import toast from 'react-hot-toast'
 
 const SkeletonLoader = () => (
@@ -36,21 +36,25 @@ export const AdminDashboard = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
+      
       const [statsRes, statusRes, categoryRes, buildingRes, workloadRes, trendRes] = await Promise.all([
-        axios.get('/api/admin/stats'),
-        axios.get('/api/admin/stats/by-status'),
-        axios.get('/api/admin/stats/by-category'),
-        axios.get('/api/admin/stats/by-building'),
-        axios.get('/api/admin/workload'),
-        axios.get('/api/admin/stats/resolution-trend'),
+        api.get('/admin/stats'),
+        api.get('/admin/stats/by-status'),
+        api.get('/admin/stats/by-category'),
+        api.get('/admin/stats/by-building'),
+        api.get('/admin/workload'),
+        api.get('/admin/stats/resolution-trend'),
       ])
 
       setStats(statsRes.data)
-      setStatusData(statusRes.data)
-      setCategoryData(categoryRes.data)
-      setBuildingData(buildingRes.data)
-      setWorkloadData(workloadRes.data)
-      setTrendData(trendRes.data)
+
+      // Defensive checking: Safely parse array even if backend nests it under .data or .statusData
+      setStatusData(Array.isArray(statusRes.data) ? statusRes.data : statusRes.data?.data || statusRes.data?.statusData || [])
+      setCategoryData(Array.isArray(categoryRes.data) ? categoryRes.data : categoryRes.data?.data || categoryRes.data?.categoryData || [])
+      setBuildingData(Array.isArray(buildingRes.data) ? buildingRes.data : buildingRes.data?.data || buildingRes.data?.buildingData || [])
+      setWorkloadData(Array.isArray(workloadRes.data) ? workloadRes.data : workloadRes.data?.data || workloadRes.data?.workload || [])
+      setTrendData(Array.isArray(trendRes.data) ? trendRes.data : trendRes.data?.data || trendRes.data?.trendData || [])
+      
       setError(null)
     } catch (err) {
       console.error('Dashboard error:', err)
@@ -130,7 +134,7 @@ export const AdminDashboard = () => {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               By Status
             </h3>
-            {statusData.length > 0 ? (
+            {Array.isArray(statusData) && statusData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -160,7 +164,7 @@ export const AdminDashboard = () => {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               By Category
             </h3>
-            {categoryData.length > 0 ? (
+            {Array.isArray(categoryData) && categoryData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={categoryData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -180,7 +184,7 @@ export const AdminDashboard = () => {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Resolution Trend
             </h3>
-            {trendData.length > 0 ? (
+            {Array.isArray(trendData) && trendData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={trendData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -213,7 +217,7 @@ export const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {buildingData.length > 0 ? (
+                  {Array.isArray(buildingData) && buildingData.length > 0 ? (
                     buildingData.map((row) => (
                       <tr key={row.building} className="border-b border-gray-100 dark:border-gray-700">
                         <td className="py-3 px-2">{row.building}</td>
@@ -247,9 +251,9 @@ export const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {workloadData.length > 0 ? (
+                  {Array.isArray(workloadData) && workloadData.length > 0 ? (
                     workloadData.map((row) => (
-                      <tr key={row.id} className="border-b border-gray-100 dark:border-gray-700">
+                      <tr key={row.id || row.name} className="border-b border-gray-100 dark:border-gray-700">
                         <td className="py-3 px-2">{row.name}</td>
                         <td className="text-right py-3 px-2 font-semibold">{row.open_tasks || 0}</td>
                       </tr>

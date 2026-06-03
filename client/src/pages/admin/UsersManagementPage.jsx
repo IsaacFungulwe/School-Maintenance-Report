@@ -20,7 +20,7 @@ import { EmptyState } from '../../components/common/EmptyState'
 import toast from 'react-hot-toast'
 
 export const UsersManagementPage = () => {
-  const [users, setUsers] = useState(null)
+  const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
@@ -30,16 +30,26 @@ export const UsersManagementPage = () => {
     name: '',
     email: '',
     role: 'student',
+    password: '',
   })
+
+  // Helper function to extract array from any standard API response layout
+  const extractUsersArray = (responseData) => {
+    if (Array.isArray(responseData)) return responseData
+    if (responseData && Array.isArray(responseData.users)) return responseData.users
+    if (responseData && Array.isArray(responseData.data)) return responseData.data
+    return []
+  }
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoading(true)
         const res = await userApi.getAll({ search: searchTerm })
-        setUsers(res.data)
+        setUsers(extractUsersArray(res.data))
       } catch (error) {
         toast.error('Failed to load users')
+        setUsers([])
       } finally {
         setLoading(false)
       }
@@ -58,10 +68,11 @@ export const UsersManagementPage = () => {
       await userApi.create(formData)
       toast.success('User created successfully')
       setShowAddModal(false)
-      setFormData({ name: '', email: '', role: 'student' })
-      // Refresh list
+      setFormData({ name: '', email: '', role: 'student', password: '' })
+      
+      // Refresh list cleanly
       const res = await userApi.getAll({ search: searchTerm })
-      setUsers(res.data)
+      setUsers(extractUsersArray(res.data))
     } catch (error) {
       toast.error('Failed to create user')
     }
@@ -71,8 +82,9 @@ export const UsersManagementPage = () => {
     try {
       await userApi.updateRole(userId, newRole)
       toast.success('User role updated')
+      
       const res = await userApi.getAll({ search: searchTerm })
-      setUsers(res.data)
+      setUsers(extractUsersArray(res.data))
     } catch (error) {
       toast.error('Failed to update user role')
     }
@@ -84,8 +96,9 @@ export const UsersManagementPage = () => {
     try {
       await userApi.deactivate(userId)
       toast.success('User deactivated')
+      
       const res = await userApi.getAll({ search: searchTerm })
-      setUsers(res.data)
+      setUsers(extractUsersArray(res.data))
     } catch (error) {
       toast.error('Failed to deactivate user')
     }
@@ -129,11 +142,11 @@ export const UsersManagementPage = () => {
           />
         </div>
 
-        {/* Table */}
+        {/* Table Container */}
         <Card>
           {loading ? (
             <SkeletonLoader count={5} height="h-12" className="mb-3" />
-          ) : users && users.length > 0 ? (
+          ) : Array.isArray(users) && users.length > 0 ? (
             <div className="overflow-x-auto">
               <Table>
                 <TableHead>
@@ -167,17 +180,15 @@ export const UsersManagementPage = () => {
                       <TableCell>
                         <Badge
                           variant={user.active ? 'green' : 'default'}
-                          className={roleColors[user.role]}
+                          className={roleColors[user.role] || ''}
                         >
                           {user.active ? 'Active' : 'Inactive'}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <button
-                          onClick={() =>
-                            handleDeactivateUser(user.id)
-                          }
-                          className="text-red-600 dark:text-red-400 hover:underline text-sm"
+                          onClick={() => handleDeactivateUser(user.id)}
+                          className="text-red-600 dark:text-red-400 hover:underline text-sm font-medium"
                         >
                           Deactivate
                         </button>
@@ -209,7 +220,7 @@ export const UsersManagementPage = () => {
           isOpen={showAddModal}
           onClose={() => {
             setShowAddModal(false)
-            setFormData({ name: '', email: '', role: 'student' })
+            setFormData({ name: '', email: '', role: 'student', password: '' })
           }}
           title="Add New User"
           size="md"
@@ -244,6 +255,15 @@ export const UsersManagementPage = () => {
                 setFormData((prev) => ({ ...prev, email: e.target.value }))
               }
               placeholder="john@example.com"
+            />
+            <Input
+              label="Password"
+              type="password"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, password: e.target.value }))
+              }
+              placeholder="Enter a secure password"
             />
             <Select
               label="Role"

@@ -3,7 +3,7 @@ import { DashboardLayout } from '../../layouts'
 import { Card } from '../../components/common/Card'
 import { Select } from '../../components/common/Select'
 import { Badge } from '../../components/common/Badge'
-import axios from 'axios'
+import api from '../../utils/api'
 import toast from 'react-hot-toast'
 
 export const AuditLog = () => {
@@ -32,7 +32,7 @@ export const AuditLog = () => {
       params.append('limit', pagination.limit)
       params.append('offset', pagination.offset)
 
-      const res = await axios.get(`/api/audit/log?${params}`)
+      const res = await api.get('/audit/log', { params })
       setAuditLog(res.data.data)
       setTotal(res.data.total)
     } catch (error) {

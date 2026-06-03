@@ -17,7 +17,7 @@ import { DashboardRedirect } from './pages/dashboard/DashboardRedirect'
 import { StudentDashboard } from './pages/dashboard/StudentDashboard'
 import { TechnicianDashboard } from './pages/dashboard/TechnicianDashboard'
 import { TicketListPage } from './pages/tickets/TicketListPage'
-import { CreateTicketPage } from './pages/tickets/CreateTicketPage'
+import CreateTicketPage from './pages/tickets/CreateTicketPage' // FIX: Changed from named import to default import
 import { TicketDetailsPage } from './pages/tickets/TicketDetailsPage'
 import { UsersManagementPage } from './pages/admin/UsersManagementPage'
 import { LocationsManagementPage } from './pages/admin/LocationsManagementPage'
@@ -221,4 +221,3 @@ function App() {
 }
 
 export default App
-

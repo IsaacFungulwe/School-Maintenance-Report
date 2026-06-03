@@ -5,7 +5,7 @@ import { Card } from '../../components/common/Card'
 import { Input } from '../../components/common/Input'
 import { Select } from '../../components/common/Select'
 import { Button } from '../../components/common/Button'
-import axios from 'axios'
+import api from '../../utils/api'
 import toast from 'react-hot-toast'
 
 export const AdminReports = () => {
@@ -34,9 +34,9 @@ export const AdminReports = () => {
       if (filters.building) params.append('building', filters.building)
 
       const [summaryRes, techRes, recurringRes] = await Promise.all([
-        axios.get(`/api/reports/summary?${params}`),
-        axios.get(`/api/reports/by-technician?${params}`),
-        axios.get(`/api/reports/recurring`),
+        api.get('/reports/summary', { params }),
+        api.get('/reports/by-technician', { params }),
+        api.get('/reports/recurring', { params }),
       ])
 
       setSummary(summaryRes.data)
@@ -58,7 +58,8 @@ export const AdminReports = () => {
       if (filters.category) params.append('category', filters.category)
       if (filters.building) params.append('building', filters.building)
 
-      const res = await axios.get(`/api/reports/export?${params}`, {
+      const res = await api.get('/reports/export', {
+        params,
         responseType: 'blob',
       })
 

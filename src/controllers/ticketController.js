@@ -103,16 +103,33 @@ const getTicketById = async (req, res, next) => {
 // POST /api/tickets
 const createTicket = async (req, res, next) => {
   try {
-    const { title, description, category, priority, location_id, image_url } = req.body;
+    // 1. Text components reside safely inside req.body
+    const { title, description, category, priority, location_id } = req.body;
 
-    if (!title || !description || !category || !location_id) {
+    if (!title || !description || !category) {
       return res.status(400).json({
-        error: 'title, description, category and location_id are required.',
+        error: 'title, description, and category are required fields.',
       });
     }
 
-    // FIX: Enforce clean numerical parsing for parent structural context insertions
-    const parsedLocationId = parseInt(location_id, 10);
+    // 2. Extract image location from Multer's req.file tracker (Default to null if no image attached)
+    const finalImageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+    // 3. Dynamic Location Fallback to prevent foreign key issues
+    let targetLocationId = location_id ? parseInt(location_id, 10) : null;
+
+    if (!targetLocationId) {
+      // Dynamically fetch the first available location ID from the table
+      const locationCheck = await pool.query('SELECT id FROM locations ORDER BY id ASC LIMIT 1');
+      
+      if (locationCheck.rows.length === 0) {
+        return res.status(500).json({
+          error: 'Database error: The locations table is completely empty. Please seed or add a location first.',
+        });
+      }
+      targetLocationId = locationCheck.rows[0].id;
+    }
+
     const parsedUserId = parseInt(req.user.id, 10);
 
     const { rows } = await pool.query(
@@ -120,7 +137,15 @@ const createTicket = async (req, res, next) => {
          (title, description, category, priority, location_id, submitted_by, last_modified_by, image_url)
        VALUES ($1, $2, $3, $4, $5, $6, $6, $7)
        RETURNING *`,
-      [title, description, category, priority || 'low', parsedLocationId, parsedUserId, image_url || null]
+      [
+        title, 
+        description, 
+        category, 
+        priority || 'low', 
+        targetLocationId, 
+        parsedUserId, 
+        finalImageUrl
+      ]
     );
 
     res.status(201).json(rows[0]);
@@ -282,4 +307,4 @@ const getStats = async (req, res, next) => {
 module.exports = {
   getTickets, getTicketById, createTicket,
   updateStatus, assignTicket, deleteTicket, getStats,
-}; 
+};

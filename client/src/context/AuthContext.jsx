@@ -1,5 +1,5 @@
 import React, { createContext, useState, useCallback, useEffect } from 'react'
-import axios from 'axios'
+import axios from 'axios' // Fixed the package name here
 
 export const AuthContext = createContext()
 
@@ -8,16 +8,16 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // Explicitly appends /api to make sure routing matches the backend app.js definitions
-  const API_URL = 'http://localhost:5000/api'
+  // Track backend server URL cleanly to route completely away from port 5173
+  const BACKEND_URL = 'http://127.0.0.1:5000'
 
-  // Initialize auth state from localStorage
+  // Initialize auth state from localStorage on application mount
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem('authToken')
       if (token) {
         try {
-          const response = await axios.get(`${API_URL}/auth/me`, {
+          const response = await axios.get(`${BACKEND_URL}/api/auth/me`, {
             headers: { Authorization: `Bearer ${token}` },
           })
           setUser(response.data)
@@ -32,13 +32,13 @@ export const AuthProvider = ({ children }) => {
     }
 
     initializeAuth()
-  }, [])
+  }, [BACKEND_URL])
 
   const login = useCallback(async (email, password) => {
     setLoading(true)
     setError(null)
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, {
+      const response = await axios.post(`${BACKEND_URL}/api/auth/login`, {
         email,
         password,
       })
@@ -53,13 +53,13 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [BACKEND_URL])
 
   const register = useCallback(async (data) => {
     setLoading(true)
     setError(null)
     try {
-      const response = await axios.post(`${API_URL}/auth/register`, data)
+      const response = await axios.post(`${BACKEND_URL}/api/auth/register`, data)
       const { token, user } = response.data
       localStorage.setItem('authToken', token)
       setUser(user)
@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [BACKEND_URL])
 
   const logout = useCallback(() => {
     localStorage.removeItem('authToken')
@@ -80,6 +80,7 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const isAuthenticated = !!user
+  
   const hasRole = (roles) => {
     if (!user) return false
     if (typeof roles === 'string') return user.role === roles

@@ -3,6 +3,7 @@ const authenticate = require('../middleware/authenticate');
 const authorize    = require('../middleware/authorize');
 const noteRoutes   = require('./notes');
 const pool         = require('../config/db');
+const upload       = require('../middleware/upload'); // Import our new multer upload middleware
 
 const {
   getTickets, getTicketById, createTicket,
@@ -14,7 +15,7 @@ router.get('/stats',
   authenticate, authorize('admin'),
   getStats);
 
-  router.use('/:id/notes', noteRoutes);
+router.use('/:id/notes', noteRoutes);
 
 router.get('/',
   authenticate,
@@ -128,8 +129,11 @@ router.patch('/:id/duplicate',
   }
 );
 
+// --- UPDATED: Added upload.single('image') inside the creation pipeline ---
 router.post('/',
-  authenticate, authorize('student', 'staff', 'admin'),
+  authenticate, 
+  authorize('student', 'staff', 'admin'),
+  upload.single('image'),
   createTicket);
 
 router.patch('/:id/status',

@@ -13,9 +13,15 @@ export const ticketApi = {
   getById: (id) =>
     api.get(`/tickets/${id}`),
 
-  // Create new ticket
+  // Create new ticket (Dynamically scales to support Multipart/FormData file payloads)
   create: (ticketData) =>
-    api.post('/tickets', ticketData),
+    api.post('/tickets', ticketData, {
+      headers: {
+        // If ticketData is an instance of FormData, pass null/multipart configuration flags 
+        // to let the browser safely format bound parameters and boundary offsets.
+        'Content-Type': ticketData instanceof FormData ? 'multipart/form-data' : 'application/json'
+      }
+    }),
 
   // Update ticket status
   updateStatus: (id, status) =>

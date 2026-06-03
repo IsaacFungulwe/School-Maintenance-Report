@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Bell, X } from 'lucide-react'
-import axios from 'axios'
+import api from '../../utils/api' 
 import { useAuth } from '../../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
@@ -24,7 +24,7 @@ export const NotificationBell = () => {
 
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get('/api/notifications')
+      const res = await api.get('/notifications') 
       setNotifications(res.data.notifications || [])
       setUnreadCount(res.data.unread_count || 0)
     } catch (error) {
@@ -35,7 +35,7 @@ export const NotificationBell = () => {
   const markAsRead = async (notificationId, ticketId) => {
     try {
       setLoading(true)
-      await axios.patch(`/api/notifications/${notificationId}/mark-read`)
+      await api.patch(`/notifications/${notificationId}/mark-read`) 
       await fetchNotifications()
       if (ticketId) {
         navigate(`/admin/tickets/${ticketId}`)
@@ -51,7 +51,7 @@ export const NotificationBell = () => {
   const markAllAsRead = async () => {
     try {
       setLoading(true)
-      await axios.patch('/api/notifications/mark-all-read')
+      await api.patch('/notifications/mark-all-read') 
       await fetchNotifications()
     } catch (error) {
       toast.error('Failed to mark all as read')

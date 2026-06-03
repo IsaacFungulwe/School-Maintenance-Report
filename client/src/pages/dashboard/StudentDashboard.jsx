@@ -27,7 +27,7 @@ const TicketCard = ({ ticket }) => (
     </p>
     <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
       <span className="text-xs text-gray-500 dark:text-gray-400">
-        {new Date(ticket.created_at).toLocaleDateString()}
+        {ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : 'N/A'}
       </span>
       <Link to={`/student/tickets/${ticket.id}`}>
         <Button variant="ghost" size="sm">
@@ -39,7 +39,8 @@ const TicketCard = ({ ticket }) => (
 )
 
 export const StudentDashboard = () => {
-  const [tickets, setTickets] = useState(null)
+  // Initialized safely as an empty array instead of null
+  const [tickets, setTickets] = useState([])
   const [stats, setStats] = useState({
     open: 0,
     pending: 0,
@@ -52,17 +53,26 @@ export const StudentDashboard = () => {
       try {
         setLoading(true)
         const res = await ticketApi.getAll({ limit: 5 })
-        setTickets(res.data)
+        
+        // Safely extract the array data looking for common backend payload wrappers
+        const extractedData = 
+          res?.data?.tickets || 
+          res?.data?.data || 
+          res?.data?.rows || 
+          (Array.isArray(res?.data) ? res.data : [])
 
-        // Calculate stats from tickets
-        const data = res.data
+        setTickets(extractedData)
+
+        // Calculate stats using the guaranteed safe array fallback
         setStats({
-          open: data.filter((t) => t.status === 'open').length,
-          pending: data.filter((t) => t.status === 'pending').length,
-          resolved: data.filter((t) => t.status === 'resolved').length,
+          open: extractedData.filter((t) => t && t.status === 'open').length,
+          pending: extractedData.filter((t) => t && t.status === 'pending').length,
+          resolved: extractedData.filter((t) => t && t.status === 'resolved').length,
         })
       } catch (error) {
+        console.error('Error fetching dashboard tickets:', error)
         toast.error('Failed to load tickets')
+        setTickets([])
       } finally {
         setLoading(false)
       }
@@ -150,7 +160,7 @@ export const StudentDashboard = () => {
           </h2>
           {loading ? (
             <SkeletonLoader count={3} height="h-24" className="mb-4" />
-          ) : tickets && tickets.length > 0 ? (
+          ) : Array.isArray(tickets) && tickets.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {tickets.map((ticket) => (
                 <TicketCard key={ticket.id} ticket={ticket} />
