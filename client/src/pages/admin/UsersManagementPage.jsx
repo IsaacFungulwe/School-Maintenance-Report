@@ -74,7 +74,8 @@ export const UsersManagementPage = () => {
       const res = await userApi.getAll({ search: searchTerm })
       setUsers(extractUsersArray(res.data))
     } catch (error) {
-      toast.error('Failed to create user')
+      const message = error.response?.data?.error || error.response?.data?.message || 'Failed to create user'
+      toast.error(message)
     }
   }
 
@@ -86,7 +87,8 @@ export const UsersManagementPage = () => {
       const res = await userApi.getAll({ search: searchTerm })
       setUsers(extractUsersArray(res.data))
     } catch (error) {
-      toast.error('Failed to update user role')
+      const message = error.response?.data?.error || error.response?.data?.message || 'Failed to update user role'
+      toast.error(message)
     }
   }
 
@@ -100,7 +102,8 @@ export const UsersManagementPage = () => {
       const res = await userApi.getAll({ search: searchTerm })
       setUsers(extractUsersArray(res.data))
     } catch (error) {
-      toast.error('Failed to deactivate user')
+      const message = error.response?.data?.error || error.response?.data?.message || 'Failed to deactivate user'
+      toast.error(message)
     }
   }
 

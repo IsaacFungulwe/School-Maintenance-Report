@@ -178,8 +178,19 @@ const updateStatus = async (req, res, next) => {
     );
     if (!existing[0]) return res.status(404).json({ error: 'Ticket not found.' });
 
-    if (role === 'technician' && String(existing[0].assigned_to) !== String(userId)) {
-      return res.status(403).json({ error: 'You can only update tickets assigned to you.' });
+    // Technicians can only update tickets assigned to them
+    if (role === 'technician') {
+      if (!existing[0].assigned_to) {
+        return res.status(403).json({ error: 'This ticket is not assigned to anyone yet.' });
+      }
+      if (String(existing[0].assigned_to) !== String(userId)) {
+        return res.status(403).json({ error: 'You can only update tickets assigned to you.' });
+      }
+    }
+
+    // Students can only update their own tickets
+    if (role === 'student' && String(existing[0].submitted_by) !== String(userId)) {
+      return res.status(403).json({ error: 'You can only update your own tickets.' });
     }
 
     const { rows } = await pool.query(

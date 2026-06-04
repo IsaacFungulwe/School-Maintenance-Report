@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MessageSquare, Clock, MapPin } from 'lucide-react'
+import { ArrowLeft, MessageSquare, Clock, MapPin, AlertCircle } from 'lucide-react'
 import { DashboardLayout } from '../../layouts'
 import { Card, CardHeader, CardBody, CardFooter } from '../../components/common/Card'
 import { Button } from '../../components/common/Button'
@@ -11,17 +11,20 @@ import { StatusBadge } from '../../components/common/Badge'
 import { SkeletonLoader } from '../../components/common/Loaders'
 import { ticketApi } from '../../api/ticketApi'
 import { noteApi } from '../../api/noteApi'
+import { useAuth } from '../../hooks/useAuth'
 import toast from 'react-hot-toast'
 
 export const TicketDetailsPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [ticket, setTicket] = useState(null)
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
   const [newNote, setNewNote] = useState('')
   const [submittingNote, setSubmittingNote] = useState(false)
   const [newStatus, setNewStatus] = useState('')
+  const [statusError, setStatusError] = useState('')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,10 +32,10 @@ export const TicketDetailsPage = () => {
         setLoading(true)
         const [ticketRes, notesRes] = await Promise.all([
           ticketApi.getById(id),
-          noteApi.getAll({ ticket_id: id }),
+          noteApi.getAll(id),
         ])
         setTicket(ticketRes.data)
-        setNotes(notesRes.data)
+        setNotes(Array.isArray(notesRes.data) ? notesRes.data : [])
         setNewStatus(ticketRes.data.status)
       } catch (error) {
         toast.error('Failed to load ticket details')
@@ -51,10 +54,7 @@ export const TicketDetailsPage = () => {
 
     try {
       setSubmittingNote(true)
-      const res = await noteApi.create({
-        ticket_id: id,
-        content: newNote,
-      })
+      const res = await noteApi.create(id, { content: newNote })
       setNotes((prev) => [...prev, res.data])
       setNewNote('')
       toast.success('Note added successfully')
@@ -67,13 +67,57 @@ export const TicketDetailsPage = () => {
 
   const handleStatusChange = async () => {
     try {
+      setStatusError('')
       await ticketApi.updateStatus(id, newStatus)
       setTicket((prev) => ({ ...prev, status: newStatus }))
       toast.success('Status updated successfully')
     } catch (error) {
-      toast.error('Failed to update status')
+      const errorMsg = error.response?.data?.error || 'Failed to update status'
+      setStatusError(errorMsg)
+      toast.error(errorMsg)
       setNewStatus(ticket.status)
     }
+  }
+
+  const getStatusOptions = () => {
+    // Valid transitions based on current status
+    const transitionMap = {
+      open: ['pending', 'in_progress'],
+      pending: ['in_progress'],
+      in_progress: ['fixed'],
+      fixed: ['closed'],
+      closed: [],
+    }
+
+    const currentStatus = ticket?.status || 'open'
+    const nextStatuses = transitionMap[currentStatus] || []
+
+    if (user?.role === 'technician') {
+      // Technicians can only transition through: in_progress → fixed
+      return nextStatuses
+        .filter((s) => ['in_progress', 'fixed'].includes(s))
+        .map((s) => {
+          const labels = { in_progress: 'In Progress', fixed: 'Fixed', pending: 'Pending' }
+          return { value: s, label: labels[s] }
+        })
+    }
+
+    const allLabels = {
+      open: 'Open',
+      pending: 'Pending',
+      in_progress: 'In Progress',
+      fixed: 'Fixed',
+      closed: 'Closed',
+    }
+
+    return nextStatuses.map((s) => ({ value: s, label: allLabels[s] }))
+  }
+
+  const canUpdateStatus = () => {
+    if (user?.role === 'admin') return true
+    if (user?.role === 'technician') return ticket?.assigned_to_name !== 'Unassigned'
+    if (user?.role === 'student') return ticket?.submitted_by === user?.id
+    return false
   }
 
   if (loading) {
@@ -211,25 +255,53 @@ export const TicketDetailsPage = () => {
                 </h3>
               </CardHeader>
               <CardBody>
-                <Select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  options={[
-                    { value: 'open', label: 'Open' },
-                    { value: 'in_progress', label: 'In Progress' },
-                    { value: 'resolved', label: 'Resolved' },
-                    { value: 'rejected', label: 'Rejected' },
-                  ]}
-                />
-                {newStatus !== ticket.status && (
-                  <Button
-                    onClick={handleStatusChange}
-                    variant="primary"
-                    size="sm"
-                    className="w-full mt-3"
-                  >
-                    Update Status
-                  </Button>
+                {canUpdateStatus() ? (
+                  <>
+                    {getStatusOptions().length > 0 ? (
+                      <>
+                        <Select
+                          value={newStatus}
+                          onChange={(e) => {
+                            setNewStatus(e.target.value)
+                            setStatusError('')
+                          }}
+                          options={getStatusOptions()}
+                        />
+                        {user?.role === 'technician' && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                            Workflow: pending → in_progress → fixed
+                          </p>
+                        )}
+                        {statusError && (
+                          <Alert
+                            type="error"
+                            message={statusError}
+                            className="mt-3"
+                          />
+                        )}
+                        {newStatus && newStatus !== ticket.status && (
+                          <Button
+                            onClick={handleStatusChange}
+                            variant="primary"
+                            size="sm"
+                            className="w-full mt-3"
+                          >
+                            Update Status
+                          </Button>
+                        )}
+                      </>
+                    ) : (
+                      <Alert
+                        type="info"
+                        message="This ticket has reached its final status."
+                      />
+                    )}
+                  </>
+                ) : (
+                  <Alert
+                    type="warning"
+                    message="You don't have permission to update this ticket's status."
+                  />
                 )}
               </CardBody>
             </Card>
@@ -263,7 +335,7 @@ export const TicketDetailsPage = () => {
                     Assigned To
                   </p>
                   <p className="font-semibold text-gray-900 dark:text-white">
-                    {ticket.technician || 'Unassigned'}
+                    {ticket.assigned_to_name || 'Unassigned'}
                   </p>
                 </div>
               </CardBody>

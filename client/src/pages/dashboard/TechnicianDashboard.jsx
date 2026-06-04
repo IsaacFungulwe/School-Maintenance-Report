@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { CheckCircle, Clock, AlertCircle } from 'lucide-react'
+import { CheckCircle, Clock, AlertCircle, Play, CheckCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { DashboardLayout } from '../../layouts'
 import { Card, CardHeader, CardBody } from '../../components/common/Card'
@@ -9,34 +9,93 @@ import { ticketApi } from '../../api/ticketApi'
 import { StatusBadge } from '../../components/common/Badge'
 import toast from 'react-hot-toast'
 
-const WorkCard = ({ ticket }) => (
-  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
-    <div className="flex items-start justify-between mb-3">
-      <div>
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-          {ticket.title}
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Location: {ticket.location || 'N/A'}
-        </p>
+const WorkCard = ({ ticket, onStatusUpdate }) => {
+  const [updating, setUpdating] = useState(false)
+
+  const getNextStatus = () => {
+    const statusFlow = {
+      pending: 'in_progress',
+      open: 'in_progress',
+      in_progress: 'fixed',
+      fixed: null,
+    }
+    return statusFlow[ticket.status] || null
+  }
+
+  const handleStatusUpdate = async () => {
+    const nextStatus = getNextStatus()
+    if (!nextStatus) return
+
+    setUpdating(true)
+    try {
+      await ticketApi.updateStatus(ticket.id, nextStatus)
+      toast.success(`Status updated to ${nextStatus}`)
+      onStatusUpdate()
+    } catch (error) {
+      const errorMsg = error.response?.data?.error || 'Failed to update status'
+      toast.error(errorMsg)
+    } finally {
+      setUpdating(false)
+    }
+  }
+
+  const nextStatus = getNextStatus()
+  const statusLabels = {
+    in_progress: 'Start Work',
+    fixed: 'Mark Complete',
+  }
+
+  return (
+    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+            {ticket.title}
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Location: {ticket.location || 'N/A'}
+          </p>
+        </div>
+        <StatusBadge status={ticket.status} />
       </div>
-      <StatusBadge status={ticket.status} />
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        {ticket.description}
+      </p>
+      <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+        <span className="text-xs text-gray-500 dark:text-gray-400">
+          Assigned: {new Date(ticket.assigned_at).toLocaleDateString()}
+        </span>
+        <div className="flex gap-2">
+          {nextStatus && (
+            <Button
+              onClick={handleStatusUpdate}
+              variant={nextStatus === 'fixed' ? 'success' : 'warning'}
+              size="sm"
+              disabled={updating}
+            >
+              {nextStatus === 'fixed' ? (
+                <>
+                  <CheckCheck size={16} />
+                  {statusLabels[nextStatus]}
+                </>
+              ) : (
+                <>
+                  <Play size={16} />
+                  {statusLabels[nextStatus]}
+                </>
+              )}
+            </Button>
+          )}
+          <Link to={`/technician/tickets/${ticket.id}`}>
+            <Button variant="ghost" size="sm">
+              Details
+            </Button>
+          </Link>
+        </div>
+      </div>
     </div>
-    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-      {ticket.description}
-    </p>
-    <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-      <span className="text-xs text-gray-500 dark:text-gray-400">
-        Assigned: {new Date(ticket.assigned_at).toLocaleDateString()}
-      </span>
-      <Link to={`/technician/tickets/${ticket.id}`}>
-        <Button variant="ghost" size="sm">
-          Work On It
-        </Button>
-      </Link>
-    </div>
-  </div>
-)
+  )
+}
 
 export const TechnicianDashboard = () => {
   const [tickets, setTickets] = useState(null)
@@ -47,26 +106,26 @@ export const TechnicianDashboard = () => {
   })
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        const res = await ticketApi.getAll({ status: 'assigned', limit: 10 })
-        setTickets(res.data)
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      const res = await ticketApi.getAll({ limit: 10 })
+      setTickets(res.data)
 
-        const data = res.data
-        setStats({
-          assigned: data.filter((t) => t.status === 'open').length,
-          inProgress: data.filter((t) => t.status === 'in_progress').length,
-          completed: data.filter((t) => t.status === 'resolved').length,
-        })
-      } catch (error) {
-        toast.error('Failed to load assigned tickets')
-      } finally {
-        setLoading(false)
-      }
+      const data = res.data
+      setStats({
+        assigned: data.filter((t) => t.status === 'pending' || t.status === 'open').length,
+        inProgress: data.filter((t) => t.status === 'in_progress').length,
+        completed: data.filter((t) => t.status === 'closed').length,
+      })
+    } catch (error) {
+      toast.error('Failed to load assigned tickets')
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchData()
   }, [])
 
@@ -144,7 +203,11 @@ export const TechnicianDashboard = () => {
           ) : tickets && tickets.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {tickets.map((ticket) => (
-                <WorkCard key={ticket.id} ticket={ticket} />
+                <WorkCard
+                  key={ticket.id}
+                  ticket={ticket}
+                  onStatusUpdate={fetchData}
+                />
               ))}
             </div>
           ) : (

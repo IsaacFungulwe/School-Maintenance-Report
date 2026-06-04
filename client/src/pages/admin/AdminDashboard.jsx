@@ -94,7 +94,7 @@ export const AdminDashboard = () => {
     <DashboardLayout>
       <div className="space-y-6">
         {/* KPI Row */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <KPICard
             icon={AlertCircle}
             title="Total Open"
@@ -123,7 +123,13 @@ export const AdminDashboard = () => {
             icon={CheckCircle}
             title="Resolved (Week)"
             value={stats.resolved_this_week}
-            color="primary"
+            color="success"
+          />
+          <KPICard
+            icon={CheckCircle}
+            title="Total Resolved"
+            value={stats.total_resolved}
+            color="success"
           />
         </div>
 

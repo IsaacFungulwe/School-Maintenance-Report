@@ -137,7 +137,7 @@ router.post('/',
   createTicket);
 
 router.patch('/:id/status',
-  authenticate, authorize('technician', 'admin'),
+  authenticate, authorize('student', 'technician', 'admin'),
   updateStatus);
 
 router.patch('/:id/assign',

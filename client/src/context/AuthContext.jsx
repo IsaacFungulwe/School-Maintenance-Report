@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
       setUser(user)
       return user
     } catch (err) {
-      const message = err.response?.data?.message || 'Login failed'
+      const message = err.response?.data?.error || err.response?.data?.message || 'Login failed'
       setError(message)
       throw new Error(message)
     } finally {
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
       setUser(user)
       return user
     } catch (err) {
-      const message = err.response?.data?.message || 'Registration failed'
+      const message = err.response?.data?.error || err.response?.data?.message || 'Registration failed'
       setError(message)
       throw new Error(message)
     } finally {

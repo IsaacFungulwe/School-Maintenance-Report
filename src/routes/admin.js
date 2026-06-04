@@ -17,7 +17,8 @@ router.get('/stats', async (req, res, next) => {
         COUNT(*) FILTER (WHERE assigned_to IS NULL AND status = 'open') as unassigned,
         COUNT(*) FILTER (WHERE status IN ('open', 'pending') AND created_at < NOW() - INTERVAL '7 days') as overdue,
         COUNT(*) FILTER (WHERE priority = 'urgent' AND status != 'closed') as urgent,
-        COUNT(*) FILTER (WHERE status = 'closed' AND resolved_at >= NOW() - INTERVAL '7 days') as resolved_this_week
+        COUNT(*) FILTER (WHERE status = 'closed' AND resolved_at >= NOW() - INTERVAL '7 days') as resolved_this_week,
+        COUNT(*) FILTER (WHERE status = 'closed') as total_resolved
       FROM tickets
       WHERE deleted_at IS NULL
     `)
@@ -29,6 +30,7 @@ router.get('/stats', async (req, res, next) => {
       overdue: parseInt(stats.overdue),
       urgent: parseInt(stats.urgent),
       resolved_this_week: parseInt(stats.resolved_this_week),
+      total_resolved: parseInt(stats.total_resolved),
     })
   } catch (error) {
     next(error)

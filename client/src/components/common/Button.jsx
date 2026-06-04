@@ -17,6 +17,7 @@ export const Button = ({
     secondary: 'bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 focus:ring-gray-400',
     danger: 'bg-red-600 hover:bg-red-700 text-white shadow-soft hover:shadow-soft-md focus:ring-red-500',
     success: 'bg-green-600 hover:bg-green-700 text-white shadow-soft hover:shadow-soft-md focus:ring-green-500',
+    warning: 'bg-orange-600 hover:bg-orange-700 text-white shadow-soft hover:shadow-soft-md focus:ring-orange-500',
     ghost: 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:ring-gray-400',
   }
 
