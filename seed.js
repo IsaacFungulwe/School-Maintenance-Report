@@ -17,7 +17,7 @@ async function seed() {
   if (result.rowCount > 0) {
     console.log(' Admin seeded')
   } else {
-    console.log('ℹ️  Admin already exists')
+    console.log('  Admin already exists')
   }
 
   await pool.end()
